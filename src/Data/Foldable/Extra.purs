@@ -86,6 +86,17 @@ occurrences :: forall a f. Eq a => Foldable f => f a -> Array (Tuple a Int)
 occurrences xs = foldl go [] xs
   where go acc x = modifyOrSnoc (\(Tuple k _) -> k == x) (\(Tuple k v) -> Tuple k (v + 1)) acc (Tuple x 1)
 
+-- | Count the amount of times a value occurs in an array by a projection.
+-- | Mostly useful for when you can not define an Ord instance
+-- |
+-- | ```purescript
+-- | let families = [{family: "Smith", children: 2}, {family: "Jones", children: 0}, {family: "Williams", children: 2}]
+-- | occurrencesBy (_.children) families == [Tuple [{family: "Smith", children: 2}, {family: "Williams", children: 2}] 2, Tuple [{family: "Jones", children: 0}] 0]
+-- | ```
+occurrencesBy :: forall a b f. Eq b => Foldable f => (a -> b) -> f a -> Array (Tuple (Array a) Int)
+occurrencesBy f xs = foldl go [] xs
+  where go acc x = modifyOrSnoc (\(Tuple k _) -> f (unsafeHead k) == f (unsafeHead x)) (\(Tuple k v) -> Tuple (k <> x) (v + 1)) acc (Tuple [x] 1)
+
 -- | Count the amount of times a value occurs in an array.
 -- | Requires an Ord instance for Map. This function should be faster than `occurrences`
 -- |
