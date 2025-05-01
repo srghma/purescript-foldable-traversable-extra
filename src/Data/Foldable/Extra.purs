@@ -9,6 +9,7 @@ module Data.Foldable.Extra
   , groupMaybeMap
   , allPredicate
   , anyPredicate
+  , occurrencesBy
   ) where
 
 import Control.Applicative (pure)
@@ -105,7 +106,7 @@ occurrencesBy f xs = foldl go [] xs
   where
   go acc x = modifyOrSnoc (\(Tuple k _) -> f (unsafeHead k) == f x) (\(Tuple k v) -> Tuple (k <> [ x ]) (v + 1)) acc (Tuple [ x ] 1)
 
-  unsafeHead :: forall a. Array a -> a
+  unsafeHead :: Array a -> a
   unsafeHead array = unsafePartial (fromJust (Array.head array))
 
 -- | Count the amount of times a value occurs in an array.
