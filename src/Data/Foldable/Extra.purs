@@ -13,6 +13,7 @@ module Data.Foldable.Extra
 
 import Control.Applicative (pure)
 import Data.Array (findIndex, snoc, modifyAt)
+import Data.Array as Array
 import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either(..))
@@ -102,7 +103,10 @@ occurrences xs = foldl go [] xs
 occurrencesBy :: forall a b f. Eq b => Foldable f => (a -> b) -> f a -> Array (Tuple (Array a) Int)
 occurrencesBy f xs = foldl go [] xs
   where
-  go acc x = modifyOrSnoc (\(Tuple k _) -> f (unsafeHead k) == f (unsafeHead x)) (\(Tuple k v) -> Tuple (k <> x) (v + 1)) acc (Tuple [ x ] 1)
+  go acc x = modifyOrSnoc (\(Tuple k _) -> f (unsafeHead k) == f x) (\(Tuple k v) -> Tuple (k <> [ x ]) (v + 1)) acc (Tuple [ x ] 1)
+
+  unsafeHead :: forall a. Array a -> a
+  unsafeHead array = unsafePartial (fromJust (Array.head array))
 
 -- | Count the amount of times a value occurs in an array.
 -- | Requires an Ord instance for Map. This function should be faster than `occurrences`
